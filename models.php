@@ -52,6 +52,94 @@ class Field extends BaseClass
     }
 }
 
+class AutoField extends IntegerField {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_auto_increment = $this->get_arg($kwargs, 'auto_increment', true);
+    }
+}
+
+class BooleanField extends IntegerField {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->max_length = $this->get_arg($kwargs, 'max_length', 1);
+    }
+}
+
+class CharField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'VARCHAR');
+        $this->max_length = $this->get_arg($kwargs, 'max_length', 64);
+    }
+}
+
+class DateField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'DATE');
+    }
+}
+
+class DateTimeField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'DATETIME');
+    }
+}
+
+class DecimalField extends Field {
+    var $max_digits, $decimal_places;
+
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'DECIMAL');
+        $this->max_digits = $this->get_arg($kwargs, 'max_digits', 8);
+        $this->decimal_places = $this->get_arg($kwargs, 'decimal_places', 6);
+        $this->max_length = $this->max_digits . "," . $this->decimal_places;
+    }
+}
+
+class FloatField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'FLOAT');
+    }
+}
+
+class IntegerField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'INTEGER');
+        $this->max_length = $this->get_arg($kwargs, 'max_length', 11);
+    }
+}
+
+class TextField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'TEXT');
+    }
+}
+
 class Model extends BaseClass
 {
     /* *** *** ***
