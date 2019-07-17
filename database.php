@@ -68,7 +68,8 @@ class BaseDBClass extends BaseClass
         }
 
         if (!$this->count) {
-            throw new OperationalError("Datbase Operation failed.");
+            $this->_debug_handler($this->statement, ["dump" => true]);
+            throw new OperationalError("Datbase Operation failed: ");
         }
     }
 

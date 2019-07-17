@@ -10,6 +10,7 @@ class BaseClass
     function _debug_handler($message, $kwargs = [])
     {
         $pretty = $this->get_arg($kwargs, 'pretty', false);
+        $dump = $this->get_arg($kwargs, 'dump', false);
 
         if ($pretty) {
             $message = print_r($message, true);
@@ -23,6 +24,9 @@ class BaseClass
 
         if ($this->debug_stdout) {
             echo "$log_message\n";
+            if ($dump) {
+                var_dump($message);
+            }
         }
 
     }
