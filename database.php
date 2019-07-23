@@ -26,6 +26,10 @@ class BaseDBClass extends BaseClass
     {
         parent::__construct($kwargs);
 
+        if ( !extension_loaded('pdo') ) {
+            die("NO PDO!");
+        }
+
         $type = $this->get_arg($kwargs, 'type', $this->get_arg($_ENV, 'DB_TYPE'));
 
         $server = $this->get_arg($kwargs, 'server', $this->get_arg($_ENV, 'DB_HOST'));
