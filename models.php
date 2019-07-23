@@ -52,12 +52,22 @@ class Field extends BaseClass
     }
 }
 
+class IntegerField extends Field {
+    function __construct($kwargs = [])
+    {
+        parent::__construct($kwargs);
+
+        $this->field_type = $this->get_arg($kwargs, 'field_type', 'INTEGER');
+        $this->max_length = $this->get_arg($kwargs, 'max_length', 11);
+    }
+}
+
 class AutoField extends IntegerField {
     function __construct($kwargs = [])
     {
         parent::__construct($kwargs);
 
-        $this->field_auto_increment = $this->get_arg($kwargs, 'auto_increment', true);
+        $this->field_auto_increment = true;
     }
 }
 
@@ -121,15 +131,6 @@ class FloatField extends Field {
     }
 }
 
-class IntegerField extends Field {
-    function __construct($kwargs = [])
-    {
-        parent::__construct($kwargs);
-
-        $this->field_type = $this->get_arg($kwargs, 'field_type', 'INTEGER');
-        $this->max_length = $this->get_arg($kwargs, 'max_length', 11);
-    }
-}
 
 class TextField extends Field {
     function __construct($kwargs = [])

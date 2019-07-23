@@ -12,23 +12,25 @@ class BaseClass
         $pretty = $this->get_arg($kwargs, 'pretty', false);
         $dump = $this->get_arg($kwargs, 'dump', false);
 
-        if ($pretty) {
-            $message = print_r($message, true);
-        }
-
-        $log_message = date("Y-m-d H:i:s") . ' - ' . get_class($this) . ': ' . $message;
-
         if ($this->debug) {
-            error_log($log_message);
-        }
+            if ($pretty) {
+                $message = print_r($message, true);
+            }
 
-        if ($this->debug_stdout) {
-            echo "$log_message\n";
-            if ($dump) {
+            if (gettype($message) == 'string' && $dump !== true) {
+                if ($this->debug) {
+                    error_log($message);
+                }
+
+                $log_message = date("Y-m-d H:i:s") . ' - ' . get_class($this) . ': ' . $message;
+                echo "<pre>$log_message</pre>\n";
+            } else {
+                $log_message = date("Y-m-d H:i:s") . ' - ' . get_class($this);
+                echo "<pre>$log_message\n";
                 var_dump($message);
+                echo "</pre>\n";
             }
         }
-
     }
 
     function get_arg($kwargs=[], $arg_name, $default=null, $delete=false) {

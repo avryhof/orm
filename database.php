@@ -88,7 +88,8 @@ class BaseDBClass extends BaseClass
     function _db_query($query, $values=false)
     {
         if ($this->debug_queries) {
-            parent::_debug_handler($query);
+            $this->_debug_handler($query);
+            $this->_debug_handler($values);
         }
 
         $this->statement = $this->conn->prepare($query);
@@ -96,7 +97,7 @@ class BaseDBClass extends BaseClass
         try {
             $this->cursor($values);
         } catch (OperationalError $e) {
-            parent::_debug_handler($e->getMessage());
+            $this->_debug_handler($e->getMessage());
         }
     }
 

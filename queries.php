@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "exceptions.php");
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "base_class.php");
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "database.php");
 
 class QueryObject implements ArrayAccess {
     var $container = array();
@@ -157,18 +158,18 @@ class Objects extends BaseDBClass
                     $field_definition = $this->get_arg($attr, 'field_type', 'TEXT');
                     $field_length = $this->get_arg($attr, 'max_length', null);
                     $field_allow_null = $this->get_arg($attr, 'null', false);
-                    $field_auto_increment = $this->get_arg($attr, 'auto_increment', false);
+                    $field_auto_increment = $this->get_arg($attr, 'field_auto_increment', false);
                     $field_default_value = $this->get_arg($attr, 'default', false);
 
                 } elseif (gettype($attr) == 'object') {
-                    $attr_db_table = $attr->db_table;
-                    $attr_real_field = $attr->real_field;
+                    $attr_db_table = isset($attr->db_table) ? $attr->db_table : false;
+                    $attr_real_field = isset($attr->real_field) ? $attr->real_field : false;
 
-                    $field_definition = $attr->field_type;
-                    $field_length = $attr->max_length;
-                    $field_allow_null = $attr->null_field;
-                    $field_auto_increment = $attr->auto_increment;
-                    $field_default_value = $attr->default_value;
+                    $field_definition = isset($attr->field_type) ? $attr->field_type : false;
+                    $field_length = isset($attr->max_length) ? $attr->max_length : false;
+                    $field_allow_null = isset($attr->null_field) ? $attr->null_field : false;
+                    $field_auto_increment = isset($attr->field_auto_increment) ? $attr->field_auto_increment : false;
+                    $field_default_value = isset($attr->default) ? $attr->default : false;
                 }
 
                 if ($attr_db_table && count($this->tables) > 0) {
@@ -211,7 +212,7 @@ class Objects extends BaseDBClass
             if (!$has_pk) {
                 $this->table_definition[] = $this->encap_string($pk_name) . " BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT";
             }
-            $this->table_definition[] = "KEY(" . $this->encap_string($pk_name) . ")";
+            $this->table_definition[] = "PRIMARY KEY(" . $this->encap_string($pk_name) . ")";
         }
 
         if (!$this->table || !$this->model_instance) {
@@ -257,7 +258,11 @@ class Objects extends BaseDBClass
         $limit = $this->get_arg($kwargs, 'limit', false);
 
         if ($this->debug_queries) {
-            parent::_debug_handler('SELECT: ' . implode(",", $columns));
+            if (gettype($columns) == 'array') {
+                parent::_debug_handler('SELECT: ' . implode(",", $columns));
+            } else {
+                parent::_debug_handler('SELECT: *');
+            }
             parent::_debug_handler('FROM: ' . $this->table);
             if ($where) {
                 parent::_debug_handler("WHERE: $where");
@@ -409,7 +414,6 @@ class Objects extends BaseDBClass
         $query = "CREATE TABLE IF NOT EXISTS " . $this->encap_string($this->table) . " (\n";
         $query .= implode(",\n", $this->table_definition);
         $query .= "\n) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-
         $this->_db_query($query);
     }
 
@@ -439,6 +443,11 @@ class Objects extends BaseDBClass
         return $this->get($kwargs);
     }
 
+    function drop_table() {
+        $query = "DROP TABLE " . $this->encap_string($this->table) . ";";
+        $this->_db_query($query);
+    }
+
     function update($fields) {
         $query_parts = [
             'UPDATE',
@@ -455,7 +464,7 @@ class Objects extends BaseDBClass
 
         $query_parts[] = implode(",", $update_values);
         $query_parts[] = "WHERE";
-        $query_parts[] = $this->encap_string($this->model_instance->pk) . " = :" . $this->model_instance->pk;
+        $query_parts[] = $this->encap_string($this->column_lookup[$this->model_instance->pk]) . " = :" . $this->model_instance->pk;
 
         $query = implode(" ", $query_parts) . ";";
 
@@ -471,7 +480,7 @@ class Objects extends BaseDBClass
             $this->encap_string($this->table),
         ];
         $query_parts[] = "WHERE";
-        $query_parts[] = $this->encap_string($this->model_instance->pk) . " = :" . $this->model_instance->pk;
+        $query_parts[] = $this->encap_string($this->column_lookup[$this->model_instance->pk]) . " = :" . $this->model_instance->pk;
 
         $query = implode(" ", $query_parts) . ";";
 
@@ -525,7 +534,7 @@ class Objects extends BaseDBClass
         $query_results = $this->filter($kwargs);
 
         if (count($query_results) == 0) {
-            throw new ObjectDoesNotExist("No objects matching query.");
+            return false;
         } elseif (count($query_results) > 1) {
             throw new MultipleObjectsReturned("Multiple objects matching query.");
         } else {
