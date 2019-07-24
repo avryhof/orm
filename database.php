@@ -47,14 +47,25 @@ class BaseDBClass extends BaseClass
         try {
             $this->conn = new PDO($this->dsn, $user, $password);
         } catch (PDOException $e) {
-            parent::_debug_handler($e->getMessage());
+            $this->_debug_handler("Connection failed:" . $e->getMessage());
         }
 
         if ($this->conn == null) {
-            error_log("Failed to connect to " . $this->dsn);
+            $this->_debug_handler("Failed to connect to " . $this->dsn);
         }
 
         $this->debug_queries = $kwargs['debug_queries'] ? $kwargs['debug_queries'] : false;
+    }
+
+    function _check_db_error() {
+        if ($this->conn != null) {
+            list($errcode, $driver_error_code, $driver_error_message) = $this->conn>errorInfo();
+
+            $error_code = $this->conn->errorCode();
+            if ($error_code != null || $errcode != null) {
+                $this->_debug_handler("$error_code: $errcode | $driver_error_code | $driver_error_message");
+            }
+        }
     }
 
     function __destruct()

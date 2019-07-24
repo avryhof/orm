@@ -12,16 +12,16 @@ class BaseClass
         $pretty = $this->get_arg($kwargs, 'pretty', false);
         $dump = $this->get_arg($kwargs, 'dump', false);
 
+        if (isinstance($message, 'string') && $dump !== true) {
+            error_log(get_class($this) . ': ' . $message);
+        }
+
         if ($this->debug) {
             if ($pretty) {
                 $message = print_r($message, true);
             }
 
             if (gettype($message) == 'string' && $dump !== true) {
-                if ($this->debug) {
-                    error_log($message);
-                }
-
                 $log_message = date("Y-m-d H:i:s") . ' - ' . get_class($this) . ': ' . $message;
                 echo "<pre>$log_message</pre>\n";
             } else {
