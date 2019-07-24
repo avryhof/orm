@@ -61,11 +61,12 @@ class BaseDBClass extends BaseClass
 
     function _check_db_error() {
         if ($this->conn != null) {
-            list($errcode, $driver_error_code, $driver_error_message) = $this->conn>errorInfo();
+//            list($errcode, $driver_error_code, $driver_error_message) = $this->conn>errorInfo();
 
             $error_code = $this->conn->errorCode();
-            if ($error_code != null || $errcode != null) {
-                $this->_debug_handler("$error_code: $errcode | $driver_error_code | $driver_error_message");
+            if ($error_code != null) {
+//                $this->_debug_handler("$error_code: $errcode | $driver_error_code | $driver_error_message");
+                $this->_debug_handler("$error_code");
             }
         }
     }
