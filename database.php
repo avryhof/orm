@@ -37,6 +37,10 @@ class BaseDBClass extends BaseClass
         $password = $this->get_arg($kwargs, 'password',$this->get_arg($_ENV, 'DB_PASSWORD'));
         $db_name = $this->get_arg($kwargs, 'db_name', $this->get_arg($_ENV, 'DB_NAME'));
 
+        if ($server == 'localhost') {
+            $server = '127.0.0.1'; // PDO in PHP7+ requires an IP Address.
+        }
+
         $this->database = $db_name;
         $this->dsn = "$type:host=$server;dbname=$db_name";
 
@@ -44,6 +48,10 @@ class BaseDBClass extends BaseClass
             $this->conn = new PDO($this->dsn, $user, $password);
         } catch (PDOException $e) {
             parent::_debug_handler($e->getMessage());
+        }
+
+        if ($this->conn == null) {
+            error_log("Failed to connect to " . $this->dsn);
         }
 
         $this->debug_queries = $kwargs['debug_queries'] ? $kwargs['debug_queries'] : false;
@@ -96,12 +104,13 @@ class BaseDBClass extends BaseClass
             $this->_debug_handler($values);
         }
 
-        $this->statement = $this->conn->prepare($query);
-
-        try {
-            $this->cursor($values);
-        } catch (OperationalError $e) {
-            $this->_debug_handler($e->getMessage());
+        if (isinstance($query, 'string')) {
+            $this->statement = $this->conn->prepare($query);
+            try {
+                $this->cursor($values);
+            } catch (OperationalError $e) {
+                $this->_debug_handler($e->getMessage());
+            }
         }
     }
 
