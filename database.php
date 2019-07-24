@@ -50,6 +50,8 @@ class BaseDBClass extends BaseClass
             $this->_debug_handler("Connection failed:" . $e->getMessage());
         }
 
+        $this->_check_db_error();
+
         if ($this->conn == null) {
             $this->_debug_handler("Failed to connect to " . $this->dsn);
         }
@@ -90,6 +92,8 @@ class BaseDBClass extends BaseClass
             $this->count = $this->statement->execute();
         }
 
+        $this->_check_db_error();
+
         if (!$this->count) {
             $this->_debug_handler($this->statement, ["dump" => true]);
             throw new OperationalError("Datbase Operation failed: ");
@@ -99,12 +103,14 @@ class BaseDBClass extends BaseClass
     function _fetch_one()
     {
         $this->result = $this->statement->fetch(PDO::FETCH_ASSOC);
+        $this->_check_db_error();
         return $this->result;
     }
 
     function _fetch_all()
     {
         $this->result = $this->statement->fetchAll(PDO::FETCH_ASSOC);
+        $this->_check_db_error();
         return $this->result;
     }
 
@@ -117,6 +123,7 @@ class BaseDBClass extends BaseClass
 
         if (isinstance($query, 'string')) {
             $this->statement = $this->conn->prepare($query);
+            $this->_check_db_error();
             try {
                 $this->cursor($values);
             } catch (OperationalError $e) {
