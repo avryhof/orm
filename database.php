@@ -50,6 +50,10 @@ class BaseDBClass extends BaseClass
             $this->_debug_handler("Connection failed:" . $e->getMessage());
         }
 
+        if ($this->conn == null) {
+            $this->_debug_handler("CONN IS NULL");
+        }
+
         $this->_check_db_error();
 
         if ($this->conn == null) {
